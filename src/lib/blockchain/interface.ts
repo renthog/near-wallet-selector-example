@@ -1,27 +1,30 @@
 import BN from 'bn.js'
 
-export type BlockchainId = 'near' | 'foo'
+export type ChainId = 'near' | 'foo'
 
-export interface FooContract {
-  listFoo(): Promise<string[]>
-  getFoo(id: string): Promise<string>
+export type ExecutionOutcome = {
+  status: 'Success' | 'Failure'
+  transactionHash: string
 }
 
-export type GetTokenBalanceInput =
-  | {
-      type: 'native'
-      forAddress: string
-    }
-  | {
-      type: 'token'
-      contractAddress: string
-      forAddress: string
-    }
+export interface SwapInput {
+  signerAddress: string
+  from: string
+  to: string
+  // example, not production ready
+  inputAmount: number
+  slippagePercentage: number
+}
 
 export interface BlockchainAdapter {
+  // example interface, unimplemented
   getBlockHeight(): Promise<number>
   getBlockHash(height: number): Promise<string>
-  getTokenBalance(input: GetTokenBalanceInput): Promise<BN>
+  getTokenBalance(owner: string, token: string): Promise<BN>
+
   signIn(): Promise<void>
   signOut(): Promise<void>
+
+  swap(input: SwapInput): Promise<ExecutionOutcome>
+  estimateSwap(input: SwapInput): Promise<number>
 }

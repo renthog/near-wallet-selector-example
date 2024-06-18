@@ -1,5 +1,5 @@
 // wallet setup is copied from near-wallet-selector example
-import { Account, Contract, providers } from 'near-api-js'
+import { providers } from 'near-api-js'
 
 // wallet selector
 import { distinctUntilChanged, map } from 'rxjs'
@@ -13,9 +13,6 @@ import {
 } from '@near-wallet-selector/core'
 import { setupMyNearWallet } from '@near-wallet-selector/my-near-wallet'
 import { NEAR_CONTRACT_ID } from '@/config'
-
-const THIRTY_TGAS = '30000000000000'
-const NO_DEPOSIT = '0'
 
 export class NearWallet {
   private _selector?: Promise<WalletSelector>
