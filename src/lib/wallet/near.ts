@@ -1,7 +1,4 @@
 // wallet setup is copied from near-wallet-selector example
-import { providers } from 'near-api-js'
-
-// wallet selector
 import { distinctUntilChanged, map } from 'rxjs'
 import '@near-wallet-selector/modal-ui/styles.css'
 import { setupModal } from '@near-wallet-selector/modal-ui'
@@ -78,75 +75,5 @@ export class NearWallet {
   signOut = async () => {
     const selectedWallet = await (await this.selector).wallet()
     selectedWallet.signOut()
-  }
-
-  //   viewMethod = async ({ contractId, method, args = {} }) => {
-  //     const url = `https://rpc.${this.networkId}.near.org`
-  //     const provider = new providers.JsonRpcProvider({ url })
-
-  //     let res = await provider.query({
-  //       request_type: 'call_function',
-  //       account_id: contractId,
-  //       method_name: method,
-  //       args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
-  //       finality: 'optimistic',
-  //     })
-  //     return JSON.parse(Buffer.from(res.result).toString())
-  //   }
-
-  //   /**
-  //    * Makes a call to a contract
-  //    * @param {Object} options - the options for the call
-  //    * @param {string} options.contractId - the contract's account id
-  //    * @param {string} options.method - the method to call
-  //    * @param {Object} options.args - the arguments to pass to the method
-  //    * @param {string} options.gas - the amount of gas to use
-  //    * @param {string} options.deposit - the amount of yoctoNEAR to deposit
-  //    * @returns {Promise<Transaction>} - the resulting transaction
-  //    */
-  //   callMethod = async ({
-  //     contractId,
-  //     method,
-  //     args = {},
-  //     gas = THIRTY_TGAS,
-  //     deposit = NO_DEPOSIT,
-  //   }) => {
-  //     // Sign a transaction with the "FunctionCall" action
-  //     const selectedWallet = await (await this.selector).wallet()
-  //     const outcome = await selectedWallet.signAndSendTransaction({
-  //       receiverId: contractId,
-  //       actions: [
-  //         {
-  //           type: 'FunctionCall',
-  //           params: {
-  //             methodName: method,
-  //             args,
-  //             gas,
-  //             deposit,
-  //           },
-  //         },
-  //       ],
-  //     })
-
-  //     if (!outcome) {
-  //       throw new Error('No outcome returned')
-  //     }
-
-  //     return providers.getTransactionLastResult(outcome)
-  //   }
-
-  /**
-   * Makes a call to a contract
-   * @param {string} txhash - the transaction hash
-   * @returns {Promise<JSON.value>} - the result of the transaction
-   */
-  getTransactionResult = async (txhash: string) => {
-    const walletSelector = await this.selector
-    const { network } = walletSelector.options
-    const provider = new providers.JsonRpcProvider({ url: network.nodeUrl })
-
-    // Retrieve transaction result from the network
-    const transaction = await provider.txStatus(txhash, 'unnused')
-    return providers.getTransactionLastResult(transaction)
   }
 }

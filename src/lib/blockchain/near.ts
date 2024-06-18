@@ -57,6 +57,8 @@ export class NearChainAdapter implements BlockchainAdapter {
     return extractOutcome(res)
   }
 
+  // create swap route and execute swap (may differ from actual ref frontend
+  // implementation, but should be close enough for demo)
   private async demoRefSwap(input: SwapInput, createTransactions = false) {
     const { simplePools } = await fetchAllPools()
     const tokenIn = await ftGetTokenMetadata(input.from)
@@ -65,7 +67,7 @@ export class NearChainAdapter implements BlockchainAdapter {
     const swapTodos = await estimateSwap({
       tokenIn,
       tokenOut,
-      amountIn: '1',
+      amountIn: input.inputAmount.toString(), // nominal
       simplePools,
     })
 
@@ -78,7 +80,7 @@ export class NearChainAdapter implements BlockchainAdapter {
     const transactions = await instantSwap({
       tokenIn,
       tokenOut,
-      amountIn: '1',
+      amountIn: input.inputAmount.toString(),
       swapTodos,
       slippageTolerance: 0.01,
       AccountId: input.signerAddress,
@@ -109,8 +111,7 @@ export class NearChainAdapter implements BlockchainAdapter {
       res.outcome.status === 'Failure'
 
     return {
-      // technically can still be pending. not in scope to handle every case for
-      // this demo
+      // technically can still be pending. not in scope to handle every case here
       status: isFailure ? 'Failure' : 'Success',
       transactionHash: res.id,
     }
