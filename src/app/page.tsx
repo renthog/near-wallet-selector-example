@@ -5,7 +5,12 @@ import 'twin.macro'
 import { Button } from '@/components/Button'
 import { FormEvent, useEffect, useState } from 'react'
 import { BlockchainAdapter, ChainId } from '@/lib/blockchain/interface'
-import { NEAR_CONTRACT_ID, SWAP_FROM, SWAP_TO } from '@/config'
+import {
+  NEAR_CONTRACT_ID,
+  SWAP_FROM,
+  SWAP_NEAR_AMOUNT,
+  SWAP_TO,
+} from '@/config'
 import { NearWallet } from '@/lib/wallet/near'
 import { BlockchainContext, useBlockchain } from '@/contexts/BlockchainContext'
 import { NearChainAdapter } from '@/lib/blockchain/near'
@@ -63,6 +68,8 @@ const WalletButton = () => {
 const SwapForm = () => {
   const { connectedAddress, adapter } = useBlockchain()
   const [amount, setAmount] = useState('')
+  const [txId, setTxId] = useState('')
+  const inputAmount = SWAP_NEAR_AMOUNT
 
   useEffect(() => {
     if (adapter && connectedAddress) {
@@ -70,24 +77,28 @@ const SwapForm = () => {
         .estimateSwap({
           from: SWAP_FROM,
           to: SWAP_TO,
-          inputAmount: 1,
+          inputAmount,
           signerAddress: connectedAddress,
           slippagePercentage: 0.01,
         })
         .then(amountOut => setAmount(amountOut.toFixed(0)))
     }
-  }, [adapter, connectedAddress])
+  }, [adapter, connectedAddress, inputAmount])
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (adapter && connectedAddress) {
-      await adapter.swap({
+      const result = await adapter.swap({
         from: SWAP_FROM,
         to: SWAP_TO,
-        inputAmount: 1,
+        inputAmount,
         signerAddress: connectedAddress,
         slippagePercentage: 0.01,
       })
+
+      console.log('swap result', result)
+
+      setTxId(result.transactionHash)
     }
   }
 
@@ -96,15 +107,25 @@ const SwapForm = () => {
       tw="bg-white rounded shadow border border-black p-4 flex flex-col items-stretch gap-4"
       onSubmit={submit}
     >
-      <p>Swapping 1 NEAR to USDT.e (testnet)</p>
+      <p>Swapping {SWAP_NEAR_AMOUNT} NEAR to USDT.e (testnet)</p>
       <div tw="tabular-nums flex justify-between gap-4">
-        <span>In (NEAR)</span> <span>1</span>
+        <span>In (NEAR)</span> <span>{inputAmount}</span>
       </div>
       <div tw="tabular-nums flex justify-between gap-4">
         <span>Out (USDT.e)</span>
         <span>{amount.length ? `~${amount}` : 'calcuating...'}</span>
       </div>
       <Button variant="primary">Confirm Swap</Button>
+      {txId && (
+        <a
+          tw="text-blue-500 underline"
+          href={`https://testnet.nearblocks.io/txns/${txId}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          View transaction
+        </a>
+      )}
     </form>
   )
 }

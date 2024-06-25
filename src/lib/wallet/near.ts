@@ -10,6 +10,7 @@ import {
 } from '@near-wallet-selector/core'
 import { setupMyNearWallet } from '@near-wallet-selector/my-near-wallet'
 import { NEAR_CONTRACT_ID } from '@/config'
+import { setupSender } from '@near-wallet-selector/sender'
 
 export class NearWallet {
   private _selector?: Promise<WalletSelector>
@@ -30,7 +31,7 @@ export class NearWallet {
   async startUp(accountChangeHook: (accountId?: string) => unknown) {
     this._selector = setupWalletSelector({
       network: this.networkId,
-      modules: [setupMyNearWallet()],
+      modules: [setupMyNearWallet(), setupSender()],
     })
 
     const walletSelector = await this.selector

@@ -12,6 +12,7 @@ import {
   Transaction as RefWeirdTransaction,
 } from '@ref-finance/ref-sdk'
 import { utils } from 'near-api-js'
+import { StandardNearFunctionCall } from '@tonic-foundation/transaction/lib/shim'
 
 export const ONE_TGAS = new BN(Math.pow(10, 12))
 export const MAX_GAS = tgasAmount(300)
@@ -151,7 +152,7 @@ export const transformTransactions = (
       signerId: AccountId,
       receiverId: t.receiverId,
       actions: t.functionCalls.map(fc => {
-        const action: FunctionCallAction = {
+        const action = {
           type: 'FunctionCall',
           params: {
             methodName: fc.methodName,
@@ -159,13 +160,19 @@ export const transformTransactions = (
             gas: fc.gas
               ? // notable change: ref sdk uses BN (near-api-js can handle BN)
                 // but we need string because near-wallet-selector *can't*
-                new BN(fc.gas).toString()
-              : tgasAmount(100).toString(),
+                new BN(fc.gas)
+              : tgasAmount(100),
             deposit: utils.format.parseNearAmount(fc.amount) || '0',
           },
         }
 
-        return action
+        const standardAction = new StandardNearFunctionCall({
+          contractId: t.receiverId,
+          attachedDeposit: new BN(action.params.deposit),
+          ...action.params,
+        })
+
+        return standardAction.toWalletSelectorAction()
       }),
     }
   })
